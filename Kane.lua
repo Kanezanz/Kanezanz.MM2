@@ -1,20 +1,20 @@
--- Kanezanz MM2 Mobile UI
+-- Kanezanz MM2 (No Fly Version)
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
--- ล้างของเก่า
-if PlayerGui:FindFirstChild("KanezanzMobileUI") then
-    PlayerGui.KanezanzMobileUI:Destroy()
+if PlayerGui:FindFirstChild("KanezanzMM2UI") then
+    PlayerGui.KanezanzMM2UI:Destroy()
 end
 
 local ScreenGui = Instance.new("ScreenGui", PlayerGui)
-ScreenGui.Name = "KanezanzMobileUI"
+ScreenGui.Name = "KanezanzMM2UI"
 ScreenGui.ResetOnSpawn = false
 
--- ปุ่มเปิด/ปิด (ย้ายมุมซ้ายบนให้กดง่ายบนจอโทรศัพท์)
+-- ปุ่มเปิด/ปิด MENU
 local ToggleBtn = Instance.new("TextButton", ScreenGui)
 ToggleBtn.Size = UDim2.new(0, 50, 0, 50)
 ToggleBtn.Position = UDim2.new(0.02, 0, 0.2, 0)
@@ -47,12 +47,11 @@ ToggleBtn.MouseButton1Click:Connect(function()
     MainFrame.Visible = not MainFrame.Visible
 end)
 
--- พื้นที่เลื่อนปุ่ม
 local Scroll = Instance.new("ScrollingFrame", MainFrame)
 Scroll.Size = UDim2.new(1, -10, 1, -45)
 Scroll.Position = UDim2.new(0, 5, 0, 40)
 Scroll.BackgroundTransparency = 1
-Scroll.CanvasSize = UDim2.new(0, 0, 0, 350)
+Scroll.CanvasSize = UDim2.new(0, 0, 0, 380)
 Scroll.ScrollBarThickness = 4
 
 local UIList = Instance.new("UIListLayout", Scroll)
@@ -71,33 +70,7 @@ local function addBtn(text, callback)
     btn.MouseButton1Click:Connect(function() callback(btn) end)
 end
 
--- ฟังก์ชันบิน (มือถือปรับให้ใช้ปุ่มกดเปิดปิดง่ายๆ)
-local isFlying = false
-local bv, bg
-addBtn("บินอิสระ (Fly) : ปิด ❌", function(btn)
-    isFlying = not isFlying
-    btn.Text = "บินอิสระ (Fly) : " .. (isFlying and "เปิด ✅" or "ปิด ❌")
-    local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if isFlying and hrp then
-        bv = Instance.new("BodyVelocity", hrp)
-        bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-        bg = Instance.new("BodyGyro", hrp)
-        bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
-        task.spawn(function()
-            while isFlying and hrp and hrp.Parent do
-                local cam = workspace.CurrentCamera
-                bg.CFrame = cam.CFrame
-                bv.Velocity = cam.CFrame.LookVector * 50
-                RunService.RenderStepped:Wait()
-            end
-        end)
-    else
-        if bv then bv:Destroy() end
-        if bg then bg:Destroy() end
-    end
-end)
-
--- กระโดดไม่จำกัด
+-- 1. กระโดดไม่จำกัด
 local isInfJump = false
 addBtn("กระโดดไม่จำกัด : ปิด ❌", function(btn)
     isInfJump = not isInfJump
@@ -111,7 +84,7 @@ UserInputService.JumpRequest:Connect(function()
     end
 end)
 
--- เดินทะลุ
+-- 2. เดินทะลุกำแพง
 addBtn("เดินทะลุกำแพง (Noclip)", function(btn)
     RunService.Stepped:Connect(function()
         if LocalPlayer.Character then
@@ -123,11 +96,11 @@ addBtn("เดินทะลุกำแพง (Noclip)", function(btn)
     btn.Text = "เดินทะลุกำแพง : เปิดแล้ว ✅"
 end)
 
--- อมตะ
+-- 3. อมตะ
 local isGod = false
-addBtn("อมตะ (Godmode) : ปิด ❌", function(btn)
+addBtn("🛡️ อมตะ (Godmode) : ปิด ❌", function(btn)
     isGod = not isGod
-    btn.Text = "อมตะ (Godmode) : " .. (isGod and "เปิด ✅" or "ปิด ❌")
+    btn.Text = "🛡️ อมตะ (Godmode) : " .. (isGod and "เปิด ✅" or "ปิด ❌")
     task.spawn(function()
         while isGod do
             pcall(function()
@@ -139,9 +112,47 @@ addBtn("อมตะ (Godmode) : ปิด ❌", function(btn)
     end)
 end)
 
--- Fling ฆาตกร
-addBtn("🌀 Fling ฆาตกร", function()
-    task.spawn(function()
+-- 4. ดึงทุกคนมาฆ่า
+addBtn("🔪 ดึงทุกคนมาฆ่าทีเดียว", function()
+    pcall(function()
+        local char = LocalPlayer.Character
+        local knife = char and char:FindFirstChild("Knife") or (LocalPlayer.Backpack and LocalPlayer.Backpack:FindFirstChild("Knife"))
+        if not knife then return end
+        if knife.Parent == LocalPlayer.Backpack then char.Humanoid:EquipTool(knife) end
+        local hrp = char.HumanoidRootPart
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                p.Character.HumanoidRootPart.CFrame = hrp.CFrame * CFrame.new(0, 0, -2.5)
+            end
+        end
+        task.wait(0.05)
+        knife:Activate()
+    end)
+end)
+
+-- 5. วาร์ปเก็บปืน
+addBtn("🎯 วาร์ปไปเก็บปืนที่ตกพื้น", function()
+    pcall(function()
+        local char = LocalPlayer.Character
+        local hrp = char and char:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
+        for _, obj in pairs(Workspace:GetChildren()) do
+            if obj.Name == "GunDrop" or (obj:IsA("Tool") and obj.Name == "Gun") then
+                hrp.CFrame = obj.Handle.CFrame
+                break
+            end
+        end
+    end)
+end)
+
+-- 6. ยิงฆาตกรออโต้
+addBtn("🔫 ยิงฆาตกรอัตโนมัติ (ถือปืน)", function()
+    pcall(function()
+        local char = LocalPlayer.Character
+        local gun = char and char:FindFirstChild("Gun") or (LocalPlayer.Backpack and LocalPlayer.Backpack:FindFirstChild("Gun"))
+        if not gun then return end
+        if gun.Parent == LocalPlayer.Backpack then char.Humanoid:EquipTool(gun) end
+        
         local target = nil
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= LocalPlayer and p.Character then
@@ -151,58 +162,80 @@ addBtn("🌀 Fling ฆาตกร", function()
                 end
             end
         end
-        if target and target:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        
+        if target and target:FindFirstChild("HumanoidRootPart") then
             local hrp = LocalPlayer.Character.HumanoidRootPart
-            local oldCF = hrp.CFrame
-            local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-            if hum then hum.PlatformStand = true end
-            
-            local bv = Instance.new("BodyVelocity", hrp)
-            bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-            bv.Velocity = Vector3.new(99999, 99999, 99999)
-            
-            local start = tick()
-            while tick() - start < 1 and target:FindFirstChild("HumanoidRootPart") do
-                hrp.CFrame = target.HumanoidRootPart.CFrame
-                RunService.RenderStepped:Wait()
-            end
-            bv:Destroy()
-            hrp.CFrame = oldCF
-            if hum then hum.PlatformStand = false end
+            hrp.CFrame = CFrame.new(hrp.Position, target.HumanoidRootPart.Position)
+            task.wait(0.1)
+            gun:Activate()
         end
     end)
 end)
 
--- Fling นายอำเภอ
+-- ฟังก์ชัน Fling พื้นฐาน
+local function executeFling(targetPlayer)
+    pcall(function()
+        local char = LocalPlayer.Character
+        local targetChar = targetPlayer.Character
+        if not char or not targetChar then return end
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        local targetHRP = targetChar:FindFirstChild("HumanoidRootPart")
+        if not hrp or not targetHRP then return end
+
+        local oldCFrame = hrp.CFrame
+        if hum then hum.PlatformStand = true end
+
+        for _, v in pairs(char:GetChildren()) do
+            if v:IsA("BasePart") then v.CanCollide = false end
+        end
+
+        local bV = Instance.new("BodyVelocity", hrp)
+        bV.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+        bV.Velocity = Vector3.new(99999, 99999, 99999)
+
+        local startTime = tick()
+        while tick() - startTime < 1 do
+            if not targetHRP or not targetHRP.Parent then break end
+            hrp.CFrame = targetHRP.CFrame
+            RunService.RenderStepped:Wait()
+        end
+
+        bV:Destroy()
+        hrp.Velocity = Vector3.new(0, 0, 0)
+        hrp.CFrame = oldCFrame
+        if hum then hum.PlatformStand = false end
+    end)
+end
+
+-- 7. Fling ฆาตกร
+addBtn("🌀 Fling ฆาตกร", function()
+    task.spawn(function()
+        local target = nil
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer and p.Character then
+                if p.Character:FindFirstChild("Knife") or (p.Backpack and p.Backpack:FindFirstChild("Knife")) then
+                    target = p
+                    break
+                end
+            end
+        end
+        if target then executeFling(target) end
+    end)
+end)
+
+-- 8. Fling นายอำเภอ
 addBtn("🌀 Fling นายอำเภอ", function()
     task.spawn(function()
         local target = nil
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= LocalPlayer and p.Character then
                 if p.Character:FindFirstChild("Gun") or (p.Backpack and p.Backpack:FindFirstChild("Gun")) then
-                    target = p.Character
+                    target = p
                     break
                 end
             end
         end
-        if target and target:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            local hrp = LocalPlayer.Character.HumanoidRootPart
-            local oldCF = hrp.CFrame
-            local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-            if hum then hum.PlatformStand = true end
-            
-            local bv = Instance.new("BodyVelocity", hrp)
-            bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-            bv.Velocity = Vector3.new(99999, 99999, 99999)
-            
-            local start = tick()
-            while tick() - start < 1 and target:FindFirstChild("HumanoidRootPart") do
-                hrp.CFrame = target.HumanoidRootPart.CFrame
-                RunService.RenderStepped:Wait()
-            end
-            bv:Destroy()
-            hrp.CFrame = oldCF
-            if hum then hum.PlatformStand = false end
-        end
+        if target then executeFling(target) end
     end)
 end)

@@ -1,4 +1,4 @@
--- Kanezanz Script (MM2: Fixed Fly, Inf Jump, Fling & Godmode)
+-- Kanezanz Script (MM2: Clean Fly & Inf Jump Fix)
 local Services = {
     Players = game:GetService("Players"),
     RunService = game:GetService("RunService"),
@@ -7,12 +7,9 @@ local Services = {
 }
 
 local LocalPlayer = Services.Players.LocalPlayer
-
--- ระบบหาที่เก็บ UI ที่ปลอดภัย
 local CoreGui = game:GetService("CoreGui")
 local ParentContainer = (gethui and gethui()) or (syn and syn.protect_gui and syn.protect_gui(Instance.new("ScreenGui"))) or CoreGui
 
--- ล้าง UI เก่า
 pcall(function()
     if ParentContainer:FindFirstChild("KanezanzMM2UI") then
         ParentContainer.KanezanzMM2UI:Destroy()
@@ -24,7 +21,6 @@ ScreenGui.Name = "KanezanzMM2UI"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = ParentContainer
 
--- ปุ่มเปิด-ปิด [K]
 local ToggleBtn = Instance.new("TextButton")
 ToggleBtn.Name = "KanezanzToggle"
 ToggleBtn.Parent = ScreenGui
@@ -39,7 +35,6 @@ ToggleBtn.Active = true
 ToggleBtn.Draggable = true
 Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(1, 0)
 
--- หน้าต่างหลัก
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
@@ -68,7 +63,6 @@ ToggleBtn.MouseButton1Click:Connect(function()
     MainFrame.Visible = not MainFrame.Visible
 end)
 
--- แถบเลือกแท็บฝั่งซ้าย
 local TabBar = Instance.new("Frame")
 TabBar.Parent = MainFrame
 TabBar.Size = UDim2.new(0, 120, 1, -45)
@@ -83,7 +77,6 @@ TabList.HorizontalAlignment = Enum.HorizontalAlignment.Center
 local TabPadding = Instance.new("UIPadding", TabBar)
 TabPadding.PaddingTop = UDim.new(0, 8)
 
--- พื้นที่แสดงเนื้อหาฝั่งขวา
 local ContentArea = Instance.new("Frame")
 ContentArea.Parent = MainFrame
 ContentArea.Size = UDim2.new(1, -142, 1, -45)
@@ -156,7 +149,7 @@ end
 -- ==================== แท็บ 1: เกมทั่วไป ====================
 local isFlying = false
 local flySpeed = 50
-local flyPart
+local flyConnection
 
 createButton(Tab1Page, "บินอิสระ (WASD) : ปิด ❌", function(btn)
     isFlying = not isFlying
@@ -165,39 +158,49 @@ createButton(Tab1Page, "บินอิสระ (WASD) : ปิด ❌", functi
 
     local char = LocalPlayer.Character
     local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
 
-    if isFlying and hrp then
-        if flyPart then flyPart:Destroy() end
-        flyPart = Instance.new("Part", workspace)
-        flyPart.Size = Vector3.new(1, 1, 1)
-        flyPart.Transparency = 1
-        flyPart.CanCollide = false
-        flyPart.CFrame = hrp.CFrame
-        
-        local bv = Instance.new("BodyVelocity", flyPart)
+    if isFlying and hrp and hum then
+        hum.PlatformStand = true
+        local bv = Instance.new("BodyVelocity", hrp)
         bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
         bv.Velocity = Vector3.new(0, 0, 0)
         
-        task.spawn(function()
-            while isFlying and flyPart and char and char:FindFirstChild("Humanoid") do
-                local cam = workspace.CurrentCamera
-                local moveDir = Vector3.new()
-                if Services.UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir += cam.CFrame.LookVector end
-                if Services.UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir -= cam.CFrame.LookVector end
-                if Services.UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir -= cam.CFrame.RightVector end
-                if Services.UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir += cam.CFrame.RightVector end
-                if Services.UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDir += Vector3.new(0, 1, 0) end
-                if Services.UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveDir -= Vector3.new(0, 1, 0) end
-                
-                bv.Velocity = moveDir * flySpeed
-                hrp.CFrame = CFrame.new(flyPart.Position, flyPart.Position + cam.CFrame.LookVector)
-                hrp.Velocity = Vector3.new(0, 0, 0)
-                Services.RunService.RenderStepped:Wait()
+        local bg = Instance.new("BodyGyro", hrp)
+        bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+        bg.CFrame = hrp.CFrame
+
+        flyConnection = Services.RunService.RenderStepped:Connect(function()
+            if not isFlying or not char or not hrp.Parent then
+                if bv then bv:Destroy() end
+                if bg then bg:Destroy() end
+                if hum then hum.PlatformStand = false end
+                if flyConnection then flyConnection:Disconnect() end
+                return
             end
-            if flyPart then flyPart:Destroy() flyPart = nil end
+            
+            local cam = workspace.CurrentCamera
+            bg.CFrame = cam.CFrame
+            local moveDir = Vector3.new()
+            
+            if Services.UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir += cam.CFrame.LookVector end
+            if Services.UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir -= cam.CFrame.LookVector end
+            if Services.UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir -= cam.CFrame.RightVector end
+            if Services.UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir += cam.CFrame.RightVector end
+            if Services.UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDir += Vector3.new(0, 1, 0) end
+            if Services.UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveDir -= Vector3.new(0, 1, 0) end
+            
+            bv.Velocity = moveDir * flySpeed
         end)
     else
-        if flyPart then flyPart:Destroy() flyPart = nil end
+        isFlying = false
+        if hum then hum.PlatformStand = false end
+        if flyConnection then flyConnection:Disconnect() end
+        if hrp then
+            for _, v in pairs(hrp:GetChildren()) do
+                if v:IsA("BodyVelocity") or v:IsA("BodyGyro") then v:Destroy() end
+            end
+        end
     end
 end)
 

@@ -1,16 +1,15 @@
--- Kanezanz Script (Dual Tab UI & Smart Warning Fling System)
+-- Kanezanz Script (3 Tabs UI: General, Fling/Kill, Blue Lock Rivals)
 local Services = {
     Players = game:GetService("Players"),
     RunService = game:GetService("RunService"),
     Workspace = game:GetService("Workspace"),
-    UserInputService = game:GetService("UserInputService"),
-    ReplicatedStorage = game:GetService("ReplicatedStorage")
+    UserInputService = game:GetService("UserInputService")
 }
 
 local LocalPlayer = Services.Players.LocalPlayer
 local FlingHistory = {}
 
--- เช็คการเกิด/ตาย เพื่อรีเซ็ตประวัติเมื่อจบ/เริ่มรอบใหม่
+-- รีเซ็ตประวัติ Fling เมื่อผู้เล่นเกิดใหม่
 Services.Players.PlayerAdded:Connect(function(player)
     player.CharacterAdded:Connect(function()
         FlingHistory[player.UserId] = nil
@@ -23,7 +22,6 @@ for _, p in pairs(Services.Players:GetPlayers()) do
     end)
 end
 
--- หาพื้นที่ Parent สำหรับสร้าง UI บน Delta
 local function getUIContainer()
     if gethui then
         return gethui()
@@ -48,7 +46,7 @@ ScreenGui.Name = "KanezanzDualTabUI"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = ParentContainer
 
--- 2. ปุ่มวงกลมสีฟ้า [K] เปิด-ปิด
+-- 2. ปุ่มวงกลมสีฟ้า [K] เปิด-ปิด UI
 local ToggleBtn = Instance.new("TextButton")
 ToggleBtn.Name = "KanezanzToggle"
 ToggleBtn.Parent = ScreenGui
@@ -70,7 +68,7 @@ ToggleCorner.Parent = ToggleBtn
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
-MainFrame.Size = UDim2.new(0, 360, 0, 300)
+MainFrame.Size = UDim2.new(0, 370, 0, 330)
 MainFrame.Position = UDim2.new(0.3, 0, 0.25, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(12, 22, 38)
 MainFrame.Active = true
@@ -86,7 +84,6 @@ FrameStroke.Thickness = 2
 FrameStroke.Color = Color3.fromRGB(0, 150, 255)
 FrameStroke.Parent = MainFrame
 
--- หัวข้อ
 local Title = Instance.new("TextLabel")
 Title.Parent = MainFrame
 Title.Size = UDim2.new(1, 0, 0, 35)
@@ -104,7 +101,7 @@ end)
 local TabBar = Instance.new("Frame")
 TabBar.Name = "TabBar"
 TabBar.Parent = MainFrame
-TabBar.Size = UDim2.new(0, 110, 1, -45)
+TabBar.Size = UDim2.new(0, 115, 1, -45)
 TabBar.Position = UDim2.new(0, 8, 0, 38)
 TabBar.BackgroundColor3 = Color3.fromRGB(18, 32, 54)
 
@@ -125,11 +122,11 @@ TabPadding.PaddingTop = UDim.new(0, 8)
 local ContentArea = Instance.new("Frame")
 ContentArea.Name = "ContentArea"
 ContentArea.Parent = MainFrame
-ContentArea.Size = UDim2.new(1, -132, 1, -45)
-ContentArea.Position = UDim2.new(0, 124, 0, 38)
+ContentArea.Size = UDim2.new(1, -137, 1, -45)
+ContentArea.Position = UDim2.new(0, 129, 0, 38)
 ContentArea.BackgroundTransparency = 1
 
--- หน้าแท็บ 1 (เกมทั่วไป)
+-- หน้าแท็บต่างๆ
 local Tab1Page = Instance.new("ScrollingFrame")
 Tab1Page.Parent = ContentArea
 Tab1Page.Size = UDim2.new(1, 0, 1, 0)
@@ -142,12 +139,11 @@ local Tab1List = Instance.new("UIListLayout")
 Tab1List.Parent = Tab1Page
 Tab1List.Padding = UDim.new(0, 5)
 
--- หน้าแท็บ 2 (ปั่น Fling)
 local Tab2Page = Instance.new("ScrollingFrame")
 Tab2Page.Parent = ContentArea
 Tab2Page.Size = UDim2.new(1, 0, 1, 0)
 Tab2Page.BackgroundTransparency = 1
-Tab2Page.CanvasSize = UDim2.new(0, 0, 0, 260)
+Tab2Page.CanvasSize = UDim2.new(0, 0, 0, 310)
 Tab2Page.ScrollBarThickness = 3
 Tab2Page.Visible = false
 
@@ -155,51 +151,86 @@ local Tab2List = Instance.new("UIListLayout")
 Tab2List.Parent = Tab2Page
 Tab2List.Padding = UDim.new(0, 6)
 
--- ปุ่มสลับแท็บ 1
+local Tab3Page = Instance.new("ScrollingFrame")
+Tab3Page.Parent = ContentArea
+Tab3Page.Size = UDim2.new(1, 0, 1, 0)
+Tab3Page.BackgroundTransparency = 1
+Tab3Page.CanvasSize = UDim2.new(0, 0, 0, 250)
+Tab3Page.ScrollBarThickness = 3
+Tab3Page.Visible = false
+
+local Tab3List = Instance.new("UIListLayout")
+Tab3List.Parent = Tab3Page
+Tab3List.Padding = UDim.new(0, 6)
+
+-- ปุ่มกดสลับแท็บ
 local Tab1Btn = Instance.new("TextButton")
 Tab1Btn.Parent = TabBar
-Tab1Btn.Size = UDim2.new(0.9, 0, 0, 35)
+Tab1Btn.Size = UDim2.new(0.9, 0, 0, 32)
 Tab1Btn.Text = "🎮 เกมทั่วไป"
 Tab1Btn.TextColor3 = Color3.fromRGB(0, 220, 255)
 Tab1Btn.BackgroundColor3 = Color3.fromRGB(28, 55, 90)
 Tab1Btn.Font = Enum.Font.SourceSansBold
-Tab1Btn.TextSize = 13
+Tab1Btn.TextSize = 12
 
 local Tab1BtnCorner = Instance.new("UICorner")
 Tab1BtnCorner.CornerRadius = UDim.new(0, 6)
 Tab1BtnCorner.Parent = Tab1Btn
 
--- ปุ่มสลับแท็บ 2
 local Tab2Btn = Instance.new("TextButton")
 Tab2Btn.Parent = TabBar
-Tab2Btn.Size = UDim2.new(0.9, 0, 0, 35)
-Tab2Btn.Text = "🌀 ปั่น Fling"
+Tab2Btn.Size = UDim2.new(0.9, 0, 0, 32)
+Tab2Btn.Text = "🌀 ปั่น/ฆ่าทุกคน"
 Tab2Btn.TextColor3 = Color3.fromRGB(180, 180, 180)
 Tab2Btn.BackgroundColor3 = Color3.fromRGB(15, 28, 45)
 Tab2Btn.Font = Enum.Font.SourceSansBold
-Tab2Btn.TextSize = 13
+Tab2Btn.TextSize = 12
 
 local Tab2BtnCorner = Instance.new("UICorner")
 Tab2BtnCorner.CornerRadius = UDim.new(0, 6)
 Tab2BtnCorner.Parent = Tab2Btn
 
--- ฟังก์ชั่นสลับแท็บ
+local Tab3Btn = Instance.new("TextButton")
+Tab3Btn.Parent = TabBar
+Tab3Btn.Size = UDim2.new(0.9, 0, 0, 32)
+Tab3Btn.Text = "⚽ Blue Lock"
+Tab3Btn.TextColor3 = Color3.fromRGB(180, 180, 180)
+Tab3Btn.BackgroundColor3 = Color3.fromRGB(15, 28, 45)
+Tab3Btn.Font = Enum.Font.SourceSansBold
+Tab3Btn.TextSize = 12
+
+local Tab3BtnCorner = Instance.new("UICorner")
+Tab3BtnCorner.CornerRadius = UDim.new(0, 6)
+Tab3BtnCorner.Parent = Tab3Btn
+
 Tab1Btn.MouseButton1Click:Connect(function()
     Tab1Page.Visible = true
     Tab2Page.Visible = false
+    Tab3Page.Visible = false
     Tab1Btn.TextColor3 = Color3.fromRGB(0, 220, 255)
     Tab1Btn.BackgroundColor3 = Color3.fromRGB(28, 55, 90)
-    Tab2Btn.TextColor3 = Color3.fromRGB(180, 180, 180)
-    Tab2Btn.BackgroundColor3 = Color3.fromRGB(15, 28, 45)
+    Tab2Btn.TextColor3, Tab3Btn.TextColor3 = Color3.fromRGB(180, 180, 180), Color3.fromRGB(180, 180, 180)
+    Tab2Btn.BackgroundColor3, Tab3Btn.BackgroundColor3 = Color3.fromRGB(15, 28, 45), Color3.fromRGB(15, 28, 45)
 end)
 
 Tab2Btn.MouseButton1Click:Connect(function()
     Tab1Page.Visible = false
     Tab2Page.Visible = true
+    Tab3Page.Visible = false
     Tab2Btn.TextColor3 = Color3.fromRGB(0, 220, 255)
     Tab2Btn.BackgroundColor3 = Color3.fromRGB(28, 55, 90)
-    Tab1Btn.TextColor3 = Color3.fromRGB(180, 180, 180)
-    Tab1Btn.BackgroundColor3 = Color3.fromRGB(15, 28, 45)
+    Tab1Btn.TextColor3, Tab3Btn.TextColor3 = Color3.fromRGB(180, 180, 180), Color3.fromRGB(180, 180, 180)
+    Tab1Btn.BackgroundColor3, Tab3Btn.BackgroundColor3 = Color3.fromRGB(15, 28, 45), Color3.fromRGB(15, 28, 45)
+end)
+
+Tab3Btn.MouseButton1Click:Connect(function()
+    Tab1Page.Visible = false
+    Tab2Page.Visible = false
+    Tab3Page.Visible = true
+    Tab3Btn.TextColor3 = Color3.fromRGB(0, 220, 255)
+    Tab3Btn.BackgroundColor3 = Color3.fromRGB(28, 55, 90)
+    Tab1Btn.TextColor3, Tab2Btn.TextColor3 = Color3.fromRGB(180, 180, 180), Color3.fromRGB(180, 180, 180)
+    Tab1Btn.BackgroundColor3, Tab2Btn.BackgroundColor3 = Color3.fromRGB(15, 28, 45), Color3.fromRGB(15, 28, 45)
 end)
 
 local function createButton(parent, text, callback)
@@ -263,7 +294,7 @@ local function showWarningDialog(playerName, onConfirm)
     Option1.Size = UDim2.new(0.9, 0, 0, 30)
     Option1.Position = UDim2.new(0.05, 0, 0.48, 0)
     Option1.BackgroundColor3 = Color3.fromRGB(40, 70, 40)
-    Option1.Text = "1. อะก็ได้ๆสงสาร (ไม่ Fling ต่อ)"
+    Option1.Text = "1. อะก็ได้ๆสงสาร (ไม่ทำต่อ)"
     Option1.TextColor3 = Color3.fromRGB(150, 255, 150)
     Option1.Font = Enum.Font.SourceSansBold
     Option1.TextSize = 12
@@ -278,7 +309,7 @@ local function showWarningDialog(playerName, onConfirm)
     Option2.Size = UDim2.new(0.9, 0, 0, 30)
     Option2.Position = UDim2.new(0.05, 0, 0.72, 0)
     Option2.BackgroundColor3 = Color3.fromRGB(90, 30, 30)
-    Option2.Text = "2. ไม่อะกูแค้น (Fling เลย)"
+    Option2.Text = "2. ไม่อะกูแค้น (ลุยเลย)"
     Option2.TextColor3 = Color3.fromRGB(255, 150, 150)
     Option2.Font = Enum.Font.SourceSansBold
     Option2.TextSize = 12
@@ -303,13 +334,14 @@ local function executeFling(targetPlayer)
     pcall(function()
         local char = LocalPlayer.Character
         local targetChar = targetPlayer.Character
-        if not char or not targetChar or not char:FindFirstChild("HumanoidRootPart") or not targetChar:FindFirstChild("HumanoidRootPart") then return end
+        if not char or not targetChar then return end
 
-        local hrp = char.HumanoidRootPart
+        local hrp = char:FindFirstChild("HumanoidRootPart")
         local hum = char:FindFirstChildOfClass("Humanoid")
-        local targetHRP = targetChar.HumanoidRootPart
-        local originalCFrame = hrp.CFrame
+        local targetHRP = targetChar:FindFirstChild("HumanoidRootPart")
+        if not hrp or not targetHRP then return end
 
+        local oldCFrame = hrp.CFrame
         FlingHistory[targetPlayer.UserId] = true
 
         if hum then
@@ -317,21 +349,35 @@ local function executeFling(targetPlayer)
             hum:ChangeState(Enum.HumanoidStateType.GettingUp)
         end
 
-        local startTime = tick()
-        while tick() - startTime < 1.2 do
-            if not targetHRP or not targetHRP.Parent or not char or not hrp then break end
-            
-            if hum then hum.PlatformStand = false end
+        for _, v in pairs(char:GetChildren()) do
+            if v:IsA("BasePart") then
+                v.CanCollide = false
+            end
+        end
 
-            hrp.Velocity = Vector3.new(99999, 99999, 99999)
-            hrp.RotVelocity = Vector3.new(99999, 99999, 99999)
-            hrp.CFrame = targetHRP.CFrame * CFrame.new(math.random(-1,1), math.random(-1,1), math.random(-1,1))
+        local bV = Instance.new("BodyVelocity")
+        bV.MaxForce = Vector3.new( math.huge, math.huge, math.huge )
+        bV.Velocity = Vector3.new(999999, 999999, 999999)
+        bV.Parent = hrp
+
+        local bA = Instance.new("BodyAngularVelocity")
+        bA.MaxTorque = Vector3.new( math.huge, math.huge, math.huge )
+        bA.AngularVelocity = Vector3.new(999999, 999999, 999999)
+        bA.Parent = hrp
+
+        local startTime = tick()
+        while tick() - startTime < 0.8 do
+            if not targetHRP or not targetHRP.Parent or not hrp then break end
+            hrp.CFrame = targetHRP.CFrame * CFrame.new(math.random(-1, 1), math.random(-1, 1), math.random(-1, 1))
             Services.RunService.RenderStepped:Wait()
         end
 
+        bV:Destroy()
+        bA:Destroy()
+
         hrp.Velocity = Vector3.new(0, 0, 0)
         hrp.RotVelocity = Vector3.new(0, 0, 0)
-        hrp.CFrame = originalCFrame
+        hrp.CFrame = oldCFrame
 
         if hum then
             hum.PlatformStand = false
@@ -360,15 +406,10 @@ local function flingTarget(targetPlayer)
     end
 end
 
--- เช็คว่าตัวเราถือมีด/เป็นฆาตกรหรือไม่
 local function isLocalPlayerMurderer()
     local char = LocalPlayer.Character
     if not char then return false end
-
-    local hasKnifeInHand = char:FindFirstChild("Knife") ~= nil
-    local hasKnifeInBackpack = LocalPlayer:FindFirstChild("Backpack") and LocalPlayer.Backpack:FindFirstChild("Knife") ~= nil
-
-    return hasKnifeInHand or hasKnifeInBackpack
+    return (char:FindFirstChild("Knife") ~= nil) or (LocalPlayer:FindFirstChild("Backpack") and LocalPlayer.Backpack:FindFirstChild("Knife") ~= nil)
 end
 
 local function getTargetByRole(roleName)
@@ -384,51 +425,45 @@ local function getTargetByRole(roleName)
     return nil
 end
 
--- ==================== ระบบวาร์ปเก็บปืนและยิงออโต้ ====================
-local function fastGetGunAndReturn()
+local function bringAllAndKillWithKnife()
     pcall(function()
         local char = LocalPlayer.Character
         if not char or not char:FindFirstChild("HumanoidRootPart") then return end
 
-        local hrp = char.HumanoidRootPart
-        local gunDrop = nil
+        local knife = char:FindFirstChild("Knife") or (LocalPlayer:FindFirstChild("Backpack") and LocalPlayer.Backpack:FindFirstChild("Knife"))
+        if not knife then return end
 
-        for _, obj in pairs(Services.Workspace:GetDescendants()) do
-            if obj.Name == "GunDrop" or (obj:IsA("Tool") and obj.Name:lower():find("gun")) then
-                if obj:IsA("BasePart") then gunDrop = obj break
-                elseif obj:FindFirstChild("Handle") then gunDrop = obj.Handle break end
+        if knife.Parent == LocalPlayer.Backpack then
+            char.Humanoid:EquipTool(knife)
+            task.wait(0.1)
+        end
+
+        local hrp = char.HumanoidRootPart
+        local killPoint = hrp.CFrame * CFrame.new(0, 0, -2.5)
+
+        for _, p in pairs(Services.Players:GetPlayers()) do
+            if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                local targetHRP = p.Character.HumanoidRootPart
+                targetHRP.CFrame = killPoint
             end
         end
 
-        if gunDrop then
-            local originalCFrame = hrp.CFrame
-            hrp.Velocity = Vector3.new(0, 0, 0)
-            hrp.CFrame = gunDrop.CFrame * CFrame.new(0, 3.5, 0)
-            task.wait(0.06)
-            hrp.Velocity = Vector3.new(0, 0, 0)
-            hrp.CFrame = originalCFrame
-        end
+        task.wait(0.05)
+
+        if knife:FindFirstChild("Stab") then knife.Stab:FireServer()
+        elseif knife:FindFirstChild("Slash") then knife.Slash:FireServer()
+        else knife:Activate() end
     end)
 end
 
-local function shootAtMurderer()
-    pcall(function()
-        local murderer = getTargetByRole("Murderer")
-        if murderer and murderer.Character and murderer.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character then
-            local char = LocalPlayer.Character
-            local gun = char:FindFirstChildOfClass("Tool") or LocalPlayer.Backpack:FindFirstChildOfClass("Tool")
-            if gun then
-                if gun.Parent == LocalPlayer.Backpack then
-                    char.Humanoid:EquipTool(gun)
-                    task.wait(0.02)
-                end
-                local targetPos = murderer.Character.HumanoidRootPart.Position
-                if gun:FindFirstChild("Shoot") then gun.Shoot:FireServer(targetPos)
-                elseif gun:FindFirstChild("KnifeServer") then gun.KnifeServer:FireServer(targetPos)
-                else gun:Activate() end
-            end
+-- ==================== ฟังก์ชันสำหรับ Blue Lock Rivals ====================
+local function getFootball()
+    for _, obj in pairs(Services.Workspace:GetDescendants()) do
+        if obj:IsA("BasePart") and (obj.Name:lower():find("ball") or obj.Name:lower():find("football")) then
+            return obj
         end
-    end)
+    end
+    return nil
 end
 
 -- ==================== แท็บ 1: ฟังชั่นเกมทั่วไป ====================
@@ -443,20 +478,28 @@ createButton(Tab1Page, "บิน (Fly) : ปิด ❌", function(btn)
     local char = LocalPlayer.Character
     if not char or not char:FindFirstChild("HumanoidRootPart") then return end
     local hrp = char.HumanoidRootPart
+    local hum = char:FindFirstChildOfClass("Humanoid")
 
     if isFlying then
         flyBodyVel = Instance.new("BodyVelocity")
         flyBodyVel.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+        flyBodyVel.Velocity = Vector3.new(0, 0, 0)
         flyBodyVel.Parent = hrp
+
         flyBodyGyro = Instance.new("BodyGyro")
         flyBodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
         flyBodyGyro.Parent = hrp
 
         task.spawn(function()
-            while isFlying and char and char:FindFirstChild("Humanoid") do
+            while isFlying and char and hum and char:FindFirstChild("HumanoidRootPart") do
                 local cam = Services.Workspace.CurrentCamera
                 flyBodyGyro.CFrame = cam.CFrame
-                flyBodyVel.Velocity = cam.CFrame.LookVector * 50
+
+                if hum.MoveDirection.Magnitude > 0 then
+                    flyBodyVel.Velocity = hum.MoveDirection * 50
+                else
+                    flyBodyVel.Velocity = Vector3.new(0, 0, 0)
+                end
                 Services.RunService.RenderStepped:Wait()
             end
             if flyBodyVel then flyBodyVel:Destroy() end
@@ -498,54 +541,17 @@ createButton(Tab1Page, "กระโดดไม่จำกัด : ปิด �
     btn.BackgroundColor3 = isInfJump and Color3.fromRGB(0, 60, 90) or Color3.fromRGB(20, 42, 70)
 end)
 
-local isGod = false
-createButton(Tab1Page, "อมตะ (กันตาย) : ปิด ❌", function(btn)
-    isGod = not isGod
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        LocalPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, not isGod)
-    end
-    btn.Text = "อมตะ (กันตาย) : " .. (isGod and "เปิด ✅" or "ปิด ❌")
-    btn.TextColor3 = isGod and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(255, 255, 255)
-    btn.BackgroundColor3 = isGod and Color3.fromRGB(0, 60, 90) or Color3.fromRGB(20, 42, 70)
-end)
-
-createButton(Tab1Page, "วาร์ปเอาปืนและกลับที่เดิม", function()
-    fastGetGunAndReturn()
-end)
-
-local isAutoGun = false
-task.spawn(function()
-    while task.wait(0.2) do
-        if isAutoGun then fastGetGunAndReturn() end
-    end
-end)
-
-createButton(Tab1Page, "วาร์ปเก็บปืนออโต้ : ปิด ❌", function(btn)
-    isAutoGun = not isAutoGun
-    btn.Text = "วาร์ปเก็บปืนออโต้ : " .. (isAutoGun and "เปิด ✅" or "ปิด ❌")
-    btn.TextColor3 = isAutoGun and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(255, 255, 255)
-    btn.BackgroundColor3 = isAutoGun and Color3.fromRGB(0, 60, 90) or Color3.fromRGB(20, 42, 70)
-end)
-
-local isAutoShoot = false
-task.spawn(function()
-    while task.wait(0.2) do
-        if isAutoShoot then shootAtMurderer() end
-    end
-end)
-
-createButton(Tab1Page, "ยิงฆาตกรออโต้ : ปิด ❌", function(btn)
-    isAutoShoot = not isAutoShoot
-    btn.Text = "ยิงฆาตกรออโต้ : " .. (isAutoShoot and "เปิด ✅" or "ปิด ❌")
-    btn.TextColor3 = isAutoShoot and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(255, 255, 255)
-    btn.BackgroundColor3 = isAutoShoot and Color3.fromRGB(0, 60, 90) or Color3.fromRGB(20, 42, 70)
-end)
-
--- ==================== แท็บ 2: ระบบปั่น Fling ====================
--- ปุ่ม Fling ทุกคน (เฉพาะตอนเป็นฆาตกร)
-createButton(Tab2Page, "💀 Fling ฆ่าทุกคน (เฉพาะฆาตกร)", function()
+-- ==================== แท็บ 2: ระบบปั่น & ฆ่าทุกคน ====================
+createButton(Tab2Page, "🔪 ดึงทุกคนมาโดนฟันทีเดียวตายหมด", function()
     if not isLocalPlayerMurderer() then
-        -- แจ้งเตือนถ้าไม่ใช่ฆาตกร
+        showWarningDialog("ทุกคน (คุณไม่ใช่ฆาตกร / ไม่มีมีด!)", function() end)
+        return
+    end
+    bringAllAndKillWithKnife()
+end)
+
+createButton(Tab2Page, "💀 Fling ฆ่าทุกคน (วนทีละคน)", function()
+    if not isLocalPlayerMurderer() then
         showWarningDialog("ทุกคน (คุณไม่ใช่ฆาตกร / ไม่มีมีด!)", function() end)
         return
     end
@@ -554,7 +560,7 @@ createButton(Tab2Page, "💀 Fling ฆ่าทุกคน (เฉพาะฆ�
         for _, p in pairs(Services.Players:GetPlayers()) do
             if p ~= LocalPlayer and p.Character then
                 flingTarget(p)
-                task.wait(1.3)
+                task.wait(1.0)
             end
         end
     end)
@@ -570,28 +576,61 @@ createButton(Tab2Page, "Fling นายอำเภอ (ผลักตกแม
     if target then flingTarget(target) end
 end)
 
-local NameBox = Instance.new("TextBox")
-NameBox.Parent = Tab2Page
-NameBox.Size = UDim2.new(0.95, 0, 0, 30)
-NameBox.BackgroundColor3 = Color3.fromRGB(25, 45, 75)
-NameBox.PlaceholderText = "พิมพ์ชื่อผู้เล่นที่นี่..."
-NameBox.Text = ""
-NameBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-NameBox.Font = Enum.Font.SourceSans
-NameBox.TextSize = 13
-
-local NameBoxCorner = Instance.new("UICorner")
-NameBoxCorner.CornerRadius = UDim.new(0, 6)
-NameBoxCorner.Parent = NameBox
-
-createButton(Tab2Page, "Fling ผู้เล่นระบุชื่อ", function()
-    local targetName = NameBox.Text:lower()
-    if targetName ~= "" then
-        for _, p in pairs(Services.Players:GetPlayers()) do
-            if p ~= LocalPlayer and (p.Name:lower():find(targetName) or p.DisplayName:lower():find(targetName)) then
-                flingTarget(p)
-                break
-            end
+-- ==================== แท็บ 3: Blue Lock Rivals ====================
+local isMagnetBall = false
+task.spawn(function()
+    while task.wait(0.05) do
+        if isMagnetBall then
+            pcall(function()
+                local ball = getFootball()
+                local char = LocalPlayer.Character
+                if ball and char and char:FindFirstChild("HumanoidRootPart") then
+                    local hrp = char.HumanoidRootPart
+                    ball.CFrame = hrp.CFrame * CFrame.new(0, -1, -3) -- ดูดบอลมาวางไว้หน้าเท้า
+                    ball.Velocity = Vector3.new(0, 0, 0)
+                end
+            end)
         end
     end
+end)
+
+createButton(Tab3Page, "🧲 ดูดบอลเข้าหาตัว : ปิด ❌", function(btn)
+    isMagnetBall = not isMagnetBall
+    btn.Text = "🧲 ดูดบอลเข้าหาตัว : " .. (isMagnetBall and "เปิด ✅" or "ปิด ❌")
+    btn.TextColor3 = isMagnetBall and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(255, 255, 255)
+    btn.BackgroundColor3 = isMagnetBall and Color3.fromRGB(0, 60, 90) or Color3.fromRGB(20, 42, 70)
+end)
+
+local isAutoControl = false
+Services.RunService.Heartbeat:Connect(function()
+    if isAutoControl then
+        pcall(function()
+            local ball = getFootball()
+            local char = LocalPlayer.Character
+            if ball and char and char:FindFirstChild("HumanoidRootPart") then
+                local hrp = char.HumanoidRootPart
+                ball.CFrame = hrp.CFrame * CFrame.new(0, -1.5, -2)
+                ball.AssemblyLinearVelocity = hrp.Velocity
+            end
+        end)
+    end
+end)
+
+createButton(Tab3Page, "⚽ ควบคุมบอลตลอดเวลา : ปิด ❌", function(btn)
+    isAutoControl = not isAutoControl
+    btn.Text = "⚽ ควบคุมบอลตลอดเวลา : " .. (isAutoControl and "เปิด ✅" or "ปิด ❌")
+    btn.TextColor3 = isAutoControl and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(255, 255, 255)
+    btn.BackgroundColor3 = isAutoControl and Color3.fromRGB(0, 60, 90) or Color3.fromRGB(20, 42, 70)
+end)
+
+createButton(Tab3Page, "🥅 วาร์ปบอลไปจ่อหน้าประตู", function()
+    pcall(function()
+        local ball = getFootball()
+        if ball then
+            local goal = Services.Workspace:FindFirstChild("Goal") or Services.Workspace:FindFirstChild("Goal2")
+            if goal then
+                ball.CFrame = goal.CFrame * CFrame.new(0, 2, 0)
+            end
+        end
+    end)
 end)

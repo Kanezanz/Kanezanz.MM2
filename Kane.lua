@@ -1,4 +1,4 @@
--- Kanezanz Script (MM2: Fling Killer, Godmode, Fling Sheriff & All Tools)
+-- Kanezanz Script (Fixed UI Version)
 local Services = {
     Players = game:GetService("Players"),
     RunService = game:GetService("RunService"),
@@ -8,15 +8,16 @@ local Services = {
 
 local LocalPlayer = Services.Players.LocalPlayer
 
+-- ระบบหาที่เก็บ UI ที่ปลอดภัยที่สุด (ป้องกันปัญหา gethui ไม่ทำงาน)
+local CoreGui = game:GetService("CoreGui")
+local ParentContainer = (gethui and gethui()) or (syn and syn.protect_gui and syn.protect_gui(Instance.new("ScreenGui"))) or CoreGui
+
 -- ล้าง UI เก่า
 pcall(function()
-    local container = gethui and gethui() or game:GetService("CoreGui")
-    if container:FindFirstChild("KanezanzMM2UI") then
-        container.KanezanzMM2UI:Destroy()
+    if ParentContainer:FindFirstChild("KanezanzMM2UI") then
+        ParentContainer.KanezanzMM2UI:Destroy()
     end
 end)
-
-local ParentContainer = gethui and gethui() or game:GetService("CoreGui")
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "KanezanzMM2UI"
@@ -227,7 +228,6 @@ createButton(Tab1Page, "🛡️ อมตะ (Godmode) : ปิด ❌", functio
     end)
 end)
 
--- ฟังก์ชัน Fling พื้นฐานสำหรับเป้าหมาย
 local function executeFlingOnTarget(targetPlayer)
     pcall(function()
         local char = LocalPlayer.Character

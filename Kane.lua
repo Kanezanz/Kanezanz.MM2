@@ -8,8 +8,6 @@ local Services = {
 }
 
 local LocalPlayer = Services.Players.LocalPlayer
-
--- ตารางบันทึกรายชื่อคนที่โดน Fling ไปแล้วในรอบนี้
 local FlingHistory = {}
 
 -- เช็คการเกิด/ตาย เพื่อรีเซ็ตประวัติเมื่อจบ/เริ่มรอบใหม่
@@ -38,7 +36,6 @@ end
 
 local ParentContainer = getUIContainer()
 
--- ลบ UI เก่าออกก่อน
 pcall(function()
     if ParentContainer:FindFirstChild("KanezanzDualTabUI") then
         ParentContainer.KanezanzDualTabUI:Destroy()
@@ -69,18 +66,13 @@ local ToggleCorner = Instance.new("UICorner")
 ToggleCorner.CornerRadius = UDim.new(1, 0)
 ToggleCorner.Parent = ToggleBtn
 
-local ToggleStroke = Instance.new("UIStroke")
-ToggleStroke.Thickness = 2
-ToggleStroke.Color = Color3.fromRGB(150, 230, 255)
-ToggleStroke.Parent = ToggleBtn
-
 -- 3. หน้าต่างหลัก (Main Frame)
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
-MainFrame.Size = UDim2.new(0, 320, 0, 320)
-MainFrame.Position = UDim2.new(0.25, 0, 0.2, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(10, 20, 35)
+MainFrame.Size = UDim2.new(0, 360, 0, 300)
+MainFrame.Position = UDim2.new(0.3, 0, 0.25, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(12, 22, 38)
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Visible = true
@@ -94,12 +86,12 @@ FrameStroke.Thickness = 2
 FrameStroke.Color = Color3.fromRGB(0, 150, 255)
 FrameStroke.Parent = MainFrame
 
--- หัวข้อสคริปต์
+-- หัวข้อ
 local Title = Instance.new("TextLabel")
 Title.Parent = MainFrame
 Title.Size = UDim2.new(1, 0, 0, 35)
 Title.Text = "Kanezanz Script 🇹🇭"
-Title.TextColor3 = Color3.fromRGB(0, 200, 255)
+Title.TextColor3 = Color3.fromRGB(0, 210, 255)
 Title.Font = Enum.Font.SourceSansBold
 Title.TextSize = 18
 Title.BackgroundTransparency = 1
@@ -108,12 +100,13 @@ ToggleBtn.MouseButton1Click:Connect(function()
     MainFrame.Visible = not MainFrame.Visible
 end)
 
--- 4. แถบเลือกโหมดด้านซ้าย (Side Tab Bar)
+-- 4. แถบเลือกแท็บฝั่งซ้าย (Side Tab Bar)
 local TabBar = Instance.new("Frame")
+TabBar.Name = "TabBar"
 TabBar.Parent = MainFrame
-TabBar.Size = UDim2.new(0, 95, 1, -40)
-TabBar.Position = UDim2.new(0, 5, 0, 35)
-TabBar.BackgroundColor3 = Color3.fromRGB(15, 28, 48)
+TabBar.Size = UDim2.new(0, 110, 1, -45)
+TabBar.Position = UDim2.new(0, 8, 0, 38)
+TabBar.BackgroundColor3 = Color3.fromRGB(18, 32, 54)
 
 local TabBarCorner = Instance.new("UICorner")
 TabBarCorner.CornerRadius = UDim.new(0, 8)
@@ -121,22 +114,27 @@ TabBarCorner.Parent = TabBar
 
 local TabList = Instance.new("UIListLayout")
 TabList.Parent = TabBar
-TabList.Padding = UDim.new(0, 5)
+TabList.Padding = UDim.new(0, 6)
 TabList.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
--- พื้นที่แสดงเนื้อหาด้านขวา (Content Area)
+local TabPadding = Instance.new("UIPadding")
+TabPadding.Parent = TabBar
+TabPadding.PaddingTop = UDim.new(0, 8)
+
+-- 5. พื้นที่แสดงเนื้อหาฝั่งขวา (Content Area)
 local ContentArea = Instance.new("Frame")
+ContentArea.Name = "ContentArea"
 ContentArea.Parent = MainFrame
-ContentArea.Size = UDim2.new(1, -115, 1, -40)
-ContentArea.Position = UDim2.new(0, 105, 0, 35)
+ContentArea.Size = UDim2.new(1, -132, 1, -45)
+ContentArea.Position = UDim2.new(0, 124, 0, 38)
 ContentArea.BackgroundTransparency = 1
 
--- หน้าแท็บ 1 และ 2
+-- หน้าแท็บ 1 (เกมทั่วไป)
 local Tab1Page = Instance.new("ScrollingFrame")
 Tab1Page.Parent = ContentArea
 Tab1Page.Size = UDim2.new(1, 0, 1, 0)
 Tab1Page.BackgroundTransparency = 1
-Tab1Page.CanvasSize = UDim2.new(0, 0, 0, 310)
+Tab1Page.CanvasSize = UDim2.new(0, 0, 0, 270)
 Tab1Page.ScrollBarThickness = 3
 Tab1Page.Visible = true
 
@@ -144,11 +142,12 @@ local Tab1List = Instance.new("UIListLayout")
 Tab1List.Parent = Tab1Page
 Tab1List.Padding = UDim.new(0, 5)
 
+-- หน้าแท็บ 2 (ปั่น Fling)
 local Tab2Page = Instance.new("ScrollingFrame")
 Tab2Page.Parent = ContentArea
 Tab2Page.Size = UDim2.new(1, 0, 1, 0)
 Tab2Page.BackgroundTransparency = 1
-Tab2Page.CanvasSize = UDim2.new(0, 0, 0, 250)
+Tab2Page.CanvasSize = UDim2.new(0, 0, 0, 260)
 Tab2Page.ScrollBarThickness = 3
 Tab2Page.Visible = false
 
@@ -156,13 +155,13 @@ local Tab2List = Instance.new("UIListLayout")
 Tab2List.Parent = Tab2Page
 Tab2List.Padding = UDim.new(0, 6)
 
--- ปุ่มสลับแท็บ
+-- ปุ่มสลับแท็บ 1
 local Tab1Btn = Instance.new("TextButton")
 Tab1Btn.Parent = TabBar
 Tab1Btn.Size = UDim2.new(0.9, 0, 0, 35)
 Tab1Btn.Text = "🎮 เกมทั่วไป"
-Tab1Btn.TextColor3 = Color3.fromRGB(0, 200, 255)
-Tab1Btn.BackgroundColor3 = Color3.fromRGB(20, 45, 75)
+Tab1Btn.TextColor3 = Color3.fromRGB(0, 220, 255)
+Tab1Btn.BackgroundColor3 = Color3.fromRGB(28, 55, 90)
 Tab1Btn.Font = Enum.Font.SourceSansBold
 Tab1Btn.TextSize = 13
 
@@ -170,12 +169,13 @@ local Tab1BtnCorner = Instance.new("UICorner")
 Tab1BtnCorner.CornerRadius = UDim.new(0, 6)
 Tab1BtnCorner.Parent = Tab1Btn
 
+-- ปุ่มสลับแท็บ 2
 local Tab2Btn = Instance.new("TextButton")
 Tab2Btn.Parent = TabBar
 Tab2Btn.Size = UDim2.new(0.9, 0, 0, 35)
 Tab2Btn.Text = "🌀 ปั่น Fling"
-Tab2Btn.TextColor3 = Color3.fromRGB(200, 200, 200)
-Tab2Btn.BackgroundColor3 = Color3.fromRGB(15, 30, 50)
+Tab2Btn.TextColor3 = Color3.fromRGB(180, 180, 180)
+Tab2Btn.BackgroundColor3 = Color3.fromRGB(15, 28, 45)
 Tab2Btn.Font = Enum.Font.SourceSansBold
 Tab2Btn.TextSize = 13
 
@@ -183,29 +183,30 @@ local Tab2BtnCorner = Instance.new("UICorner")
 Tab2BtnCorner.CornerRadius = UDim.new(0, 6)
 Tab2BtnCorner.Parent = Tab2Btn
 
+-- ฟังก์ชั่นสลับแท็บ
 Tab1Btn.MouseButton1Click:Connect(function()
     Tab1Page.Visible = true
     Tab2Page.Visible = false
-    Tab1Btn.TextColor3 = Color3.fromRGB(0, 200, 255)
-    Tab1Btn.BackgroundColor3 = Color3.fromRGB(20, 45, 75)
-    Tab2Btn.TextColor3 = Color3.fromRGB(200, 200, 200)
-    Tab2Btn.BackgroundColor3 = Color3.fromRGB(15, 30, 50)
+    Tab1Btn.TextColor3 = Color3.fromRGB(0, 220, 255)
+    Tab1Btn.BackgroundColor3 = Color3.fromRGB(28, 55, 90)
+    Tab2Btn.TextColor3 = Color3.fromRGB(180, 180, 180)
+    Tab2Btn.BackgroundColor3 = Color3.fromRGB(15, 28, 45)
 end)
 
 Tab2Btn.MouseButton1Click:Connect(function()
     Tab1Page.Visible = false
     Tab2Page.Visible = true
-    Tab2Btn.TextColor3 = Color3.fromRGB(0, 200, 255)
-    Tab2Btn.BackgroundColor3 = Color3.fromRGB(20, 45, 75)
-    Tab1Btn.TextColor3 = Color3.fromRGB(200, 200, 200)
-    Tab1Btn.BackgroundColor3 = Color3.fromRGB(15, 30, 50)
+    Tab2Btn.TextColor3 = Color3.fromRGB(0, 220, 255)
+    Tab2Btn.BackgroundColor3 = Color3.fromRGB(28, 55, 90)
+    Tab1Btn.TextColor3 = Color3.fromRGB(180, 180, 180)
+    Tab1Btn.BackgroundColor3 = Color3.fromRGB(15, 28, 45)
 end)
 
 local function createButton(parent, text, callback)
     local btn = Instance.new("TextButton")
     btn.Parent = parent
-    btn.Size = UDim2.new(0.95, 0, 0, 32)
-    btn.BackgroundColor3 = Color3.fromRGB(15, 35, 60)
+    btn.Size = UDim2.new(0.95, 0, 0, 30)
+    btn.BackgroundColor3 = Color3.fromRGB(20, 42, 70)
     btn.Text = text
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.Font = Enum.Font.SourceSans
@@ -257,7 +258,6 @@ local function showWarningDialog(playerName, onConfirm)
     Message.BackgroundTransparency = 1
     Message.ZIndex = 11
 
-    -- ปุ่ม 1: อะก็ได้ๆสงสาร
     local Option1 = Instance.new("TextButton")
     Option1.Parent = DialogFrame
     Option1.Size = UDim2.new(0.9, 0, 0, 30)
@@ -273,7 +273,6 @@ local function showWarningDialog(playerName, onConfirm)
     Option1Corner.CornerRadius = UDim.new(0, 5)
     Option1Corner.Parent = Option1
 
-    -- ปุ่ม 2: ไม่อะกูแค้น
     local Option2 = Instance.new("TextButton")
     Option2.Parent = DialogFrame
     Option2.Size = UDim2.new(0.9, 0, 0, 30)
@@ -299,7 +298,7 @@ local function showWarningDialog(playerName, onConfirm)
     end)
 end
 
--- ==================== ระบบ Fling ปลอดภัย + เช็คการโดนซ้ำ ====================
+-- ==================== ระบบ Fling ====================
 local function executeFling(targetPlayer)
     pcall(function()
         local char = LocalPlayer.Character
@@ -311,7 +310,6 @@ local function executeFling(targetPlayer)
         local targetHRP = targetChar.HumanoidRootPart
         local originalCFrame = hrp.CFrame
 
-        -- บันทึกว่าเป้าหมายนี้โดน Fling แล้ว
         FlingHistory[targetPlayer.UserId] = true
 
         if hum then
@@ -323,9 +321,7 @@ local function executeFling(targetPlayer)
         while tick() - startTime < 1.2 do
             if not targetHRP or not targetHRP.Parent or not char or not hrp then break end
             
-            if hum then
-                hum.PlatformStand = false
-            end
+            if hum then hum.PlatformStand = false end
 
             hrp.Velocity = Vector3.new(99999, 99999, 99999)
             hrp.RotVelocity = Vector3.new(99999, 99999, 99999)
@@ -351,7 +347,6 @@ local function flingTarget(targetPlayer)
     local targetHum = targetChar and targetChar:FindFirstChildOfClass("Humanoid")
     local targetHRP = targetChar and targetChar:FindFirstChild("HumanoidRootPart")
 
-    -- ตรวจสอบว่าเป้าหมายตายแล้ว / หลุดตกแมพ (Position.Y < -50) / หรือเคยโดน Fling ไปแล้วในรอบนี้
     local isDead = not targetHum or targetHum.Health <= 0
     local isOutOfMap = not targetHRP or targetHRP.Position.Y < -50
     local isAlreadyFlinged = FlingHistory[targetPlayer.UserId] == true
@@ -363,6 +358,17 @@ local function flingTarget(targetPlayer)
     else
         executeFling(targetPlayer)
     end
+end
+
+-- เช็คว่าตัวเราถือมีด/เป็นฆาตกรหรือไม่
+local function isLocalPlayerMurderer()
+    local char = LocalPlayer.Character
+    if not char then return false end
+
+    local hasKnifeInHand = char:FindFirstChild("Knife") ~= nil
+    local hasKnifeInBackpack = LocalPlayer:FindFirstChild("Backpack") and LocalPlayer.Backpack:FindFirstChild("Knife") ~= nil
+
+    return hasKnifeInHand or hasKnifeInBackpack
 end
 
 local function getTargetByRole(roleName)
@@ -426,14 +432,13 @@ local function shootAtMurderer()
 end
 
 -- ==================== แท็บ 1: ฟังชั่นเกมทั่วไป ====================
-
 local isFlying = false
 local flyBodyVel, flyBodyGyro
 createButton(Tab1Page, "บิน (Fly) : ปิด ❌", function(btn)
     isFlying = not isFlying
     btn.Text = "บิน (Fly) : " .. (isFlying and "เปิด ✅" or "ปิด ❌")
     btn.TextColor3 = isFlying and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(255, 255, 255)
-    btn.BackgroundColor3 = isFlying and Color3.fromRGB(0, 60, 90) or Color3.fromRGB(15, 35, 60)
+    btn.BackgroundColor3 = isFlying and Color3.fromRGB(0, 60, 90) or Color3.fromRGB(20, 42, 70)
 
     local char = LocalPlayer.Character
     if not char or not char:FindFirstChild("HumanoidRootPart") then return end
@@ -476,7 +481,7 @@ createButton(Tab1Page, "เดินทะลุกำแพง : ปิด ❌"
     isNoclip = not isNoclip
     btn.Text = "เดินทะลุกำแพง : " .. (isNoclip and "เปิด ✅" or "ปิด ❌")
     btn.TextColor3 = isNoclip and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(255, 255, 255)
-    btn.BackgroundColor3 = isNoclip and Color3.fromRGB(0, 60, 90) or Color3.fromRGB(15, 35, 60)
+    btn.BackgroundColor3 = isNoclip and Color3.fromRGB(0, 60, 90) or Color3.fromRGB(20, 42, 70)
 end)
 
 local isInfJump = false
@@ -490,7 +495,7 @@ createButton(Tab1Page, "กระโดดไม่จำกัด : ปิด �
     isInfJump = not isInfJump
     btn.Text = "กระโดดไม่จำกัด : " .. (isInfJump and "เปิด ✅" or "ปิด ❌")
     btn.TextColor3 = isInfJump and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(255, 255, 255)
-    btn.BackgroundColor3 = isInfJump and Color3.fromRGB(0, 60, 90) or Color3.fromRGB(15, 35, 60)
+    btn.BackgroundColor3 = isInfJump and Color3.fromRGB(0, 60, 90) or Color3.fromRGB(20, 42, 70)
 end)
 
 local isGod = false
@@ -501,7 +506,7 @@ createButton(Tab1Page, "อมตะ (กันตาย) : ปิด ❌", func
     end
     btn.Text = "อมตะ (กันตาย) : " .. (isGod and "เปิด ✅" or "ปิด ❌")
     btn.TextColor3 = isGod and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(255, 255, 255)
-    btn.BackgroundColor3 = isGod and Color3.fromRGB(0, 60, 90) or Color3.fromRGB(15, 35, 60)
+    btn.BackgroundColor3 = isGod and Color3.fromRGB(0, 60, 90) or Color3.fromRGB(20, 42, 70)
 end)
 
 createButton(Tab1Page, "วาร์ปเอาปืนและกลับที่เดิม", function()
@@ -519,7 +524,7 @@ createButton(Tab1Page, "วาร์ปเก็บปืนออโต้ : �
     isAutoGun = not isAutoGun
     btn.Text = "วาร์ปเก็บปืนออโต้ : " .. (isAutoGun and "เปิด ✅" or "ปิด ❌")
     btn.TextColor3 = isAutoGun and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(255, 255, 255)
-    btn.BackgroundColor3 = isAutoGun and Color3.fromRGB(0, 60, 90) or Color3.fromRGB(15, 35, 60)
+    btn.BackgroundColor3 = isAutoGun and Color3.fromRGB(0, 60, 90) or Color3.fromRGB(20, 42, 70)
 end)
 
 local isAutoShoot = false
@@ -533,10 +538,27 @@ createButton(Tab1Page, "ยิงฆาตกรออโต้ : ปิด ❌"
     isAutoShoot = not isAutoShoot
     btn.Text = "ยิงฆาตกรออโต้ : " .. (isAutoShoot and "เปิด ✅" or "ปิด ❌")
     btn.TextColor3 = isAutoShoot and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(255, 255, 255)
-    btn.BackgroundColor3 = isAutoShoot and Color3.fromRGB(0, 60, 90) or Color3.fromRGB(15, 35, 60)
+    btn.BackgroundColor3 = isAutoShoot and Color3.fromRGB(0, 60, 90) or Color3.fromRGB(20, 42, 70)
 end)
 
 -- ==================== แท็บ 2: ระบบปั่น Fling ====================
+-- ปุ่ม Fling ทุกคน (เฉพาะตอนเป็นฆาตกร)
+createButton(Tab2Page, "💀 Fling ฆ่าทุกคน (เฉพาะฆาตกร)", function()
+    if not isLocalPlayerMurderer() then
+        -- แจ้งเตือนถ้าไม่ใช่ฆาตกร
+        showWarningDialog("ทุกคน (คุณไม่ใช่ฆาตกร / ไม่มีมีด!)", function() end)
+        return
+    end
+
+    task.spawn(function()
+        for _, p in pairs(Services.Players:GetPlayers()) do
+            if p ~= LocalPlayer and p.Character then
+                flingTarget(p)
+                task.wait(1.3)
+            end
+        end
+    end)
+end)
 
 createButton(Tab2Page, "Fling ฆาตกร (ผลักตกแมพ)", function()
     local target = getTargetByRole("Murderer")
@@ -550,9 +572,9 @@ end)
 
 local NameBox = Instance.new("TextBox")
 NameBox.Parent = Tab2Page
-NameBox.Size = UDim2.new(0.95, 0, 0, 32)
-NameBox.BackgroundColor3 = Color3.fromRGB(20, 40, 65)
-NameBox.PlaceholderText = "ใส่ชื่อผู้เล่นที่ต้องการ..."
+NameBox.Size = UDim2.new(0.95, 0, 0, 30)
+NameBox.BackgroundColor3 = Color3.fromRGB(25, 45, 75)
+NameBox.PlaceholderText = "พิมพ์ชื่อผู้เล่นที่นี่..."
 NameBox.Text = ""
 NameBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 NameBox.Font = Enum.Font.SourceSans
@@ -562,7 +584,7 @@ local NameBoxCorner = Instance.new("UICorner")
 NameBoxCorner.CornerRadius = UDim.new(0, 6)
 NameBoxCorner.Parent = NameBox
 
-createButton(Tab2Page, "Fling ผู้เล่นที่ระบุชื่อ", function()
+createButton(Tab2Page, "Fling ผู้เล่นระบุชื่อ", function()
     local targetName = NameBox.Text:lower()
     if targetName ~= "" then
         for _, p in pairs(Services.Players:GetPlayers()) do

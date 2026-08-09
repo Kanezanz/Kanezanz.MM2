@@ -1,4 +1,4 @@
--- Kanezanz Script (Fixed UI Version)
+-- Kanezanz Script (MM2: Fixed Fly, Inf Jump, Fling & Godmode)
 local Services = {
     Players = game:GetService("Players"),
     RunService = game:GetService("RunService"),
@@ -8,7 +8,7 @@ local Services = {
 
 local LocalPlayer = Services.Players.LocalPlayer
 
--- ระบบหาที่เก็บ UI ที่ปลอดภัยที่สุด (ป้องกันปัญหา gethui ไม่ทำงาน)
+-- ระบบหาที่เก็บ UI ที่ปลอดภัย
 local CoreGui = game:GetService("CoreGui")
 local ParentContainer = (gethui and gethui()) or (syn and syn.protect_gui and syn.protect_gui(Instance.new("ScreenGui"))) or CoreGui
 
@@ -43,7 +43,7 @@ Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(1, 0)
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
-MainFrame.Size = UDim2.new(0, 420, 0, 360)
+MainFrame.Size = UDim2.new(0, 420, 0, 380)
 MainFrame.Position = UDim2.new(0.25, 0, 0.25, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 25, 40)
 MainFrame.Active = true
@@ -94,7 +94,7 @@ local function createPage()
     local page = Instance.new("ScrollingFrame", ContentArea)
     page.Size = UDim2.new(1, 0, 1, 0)
     page.BackgroundTransparency = 1
-    page.CanvasSize = UDim2.new(0, 0, 0, 340)
+    page.CanvasSize = UDim2.new(0, 0, 0, 360)
     page.ScrollBarThickness = 4
     page.Visible = false
     local layout = Instance.new("UIListLayout", page)
@@ -156,7 +156,7 @@ end
 -- ==================== แท็บ 1: เกมทั่วไป ====================
 local isFlying = false
 local flySpeed = 50
-local flyBodyVel, flyBodyGyro
+local flyPart
 
 createButton(Tab1Page, "บินอิสระ (WASD) : ปิด ❌", function(btn)
     isFlying = not isFlying
@@ -167,15 +167,20 @@ createButton(Tab1Page, "บินอิสระ (WASD) : ปิด ❌", functi
     local hrp = char and char:FindFirstChild("HumanoidRootPart")
 
     if isFlying and hrp then
-        flyBodyVel = Instance.new("BodyVelocity", hrp)
-        flyBodyVel.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-        flyBodyGyro = Instance.new("BodyGyro", hrp)
-        flyBodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+        if flyPart then flyPart:Destroy() end
+        flyPart = Instance.new("Part", workspace)
+        flyPart.Size = Vector3.new(1, 1, 1)
+        flyPart.Transparency = 1
+        flyPart.CanCollide = false
+        flyPart.CFrame = hrp.CFrame
+        
+        local bv = Instance.new("BodyVelocity", flyPart)
+        bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+        bv.Velocity = Vector3.new(0, 0, 0)
         
         task.spawn(function()
-            while isFlying and LocalPlayer.Character and hrp do
-                local cam = Services.Workspace.CurrentCamera
-                flyBodyGyro.CFrame = cam.CFrame
+            while isFlying and flyPart and char and char:FindFirstChild("Humanoid") do
+                local cam = workspace.CurrentCamera
                 local moveDir = Vector3.new()
                 if Services.UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir += cam.CFrame.LookVector end
                 if Services.UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir -= cam.CFrame.LookVector end
@@ -183,16 +188,33 @@ createButton(Tab1Page, "บินอิสระ (WASD) : ปิด ❌", functi
                 if Services.UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir += cam.CFrame.RightVector end
                 if Services.UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDir += Vector3.new(0, 1, 0) end
                 if Services.UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveDir -= Vector3.new(0, 1, 0) end
-                flyBodyVel.Velocity = moveDir * flySpeed
+                
+                bv.Velocity = moveDir * flySpeed
+                hrp.CFrame = CFrame.new(flyPart.Position, flyPart.Position + cam.CFrame.LookVector)
+                hrp.Velocity = Vector3.new(0, 0, 0)
                 Services.RunService.RenderStepped:Wait()
             end
-            if flyBodyVel then flyBodyVel:Destroy() end
-            if flyBodyGyro then flyBodyGyro:Destroy() end
+            if flyPart then flyPart:Destroy() flyPart = nil end
         end)
     else
-        if flyBodyVel then flyBodyVel:Destroy() end
-        if flyBodyGyro then flyBodyGyro:Destroy() end
+        if flyPart then flyPart:Destroy() flyPart = nil end
     end
+end)
+
+local isInfJump = false
+Services.UserInputService.JumpRequest:Connect(function()
+    if isInfJump and LocalPlayer.Character then
+        local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end)
+
+createButton(Tab1Page, "กระโดดไม่จำกัด (Inf Jump) : ปิด ❌", function(btn)
+    isInfJump = not isInfJump
+    btn.Text = "กระโดดไม่จำกัด (Inf Jump) : " .. (isInfJump and "เปิด ✅" or "ปิด ❌")
+    btn.TextColor3 = isInfJump and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(255, 255, 255)
 end)
 
 local isNoclip = false
